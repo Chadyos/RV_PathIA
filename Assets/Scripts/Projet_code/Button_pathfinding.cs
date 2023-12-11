@@ -36,7 +36,9 @@ public class PathfindingManager : MonoBehaviour
     IEnumerator RevealPath(List<Cell> path)
 {
     foreach (Cell cell in path)
-    {
+    {   
+        if (cell == PLAYER.cell) continue;
+        if (cell == GRID.goal) continue;
         cell.HighlightPath(Color.yellow);
         yield return new WaitForSeconds(0.2f); // Attendez 1 seconde
     }

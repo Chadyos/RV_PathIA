@@ -13,7 +13,6 @@ public class Player
     {
         this.cell = cell;
         this.grid = grid;
-        this.initScores();
     }
     //
     // public Cell findBestNeighbour(Cell cell)
@@ -73,11 +72,11 @@ public class Player
 
 
     public List<Cell> Go2Goal(Cell Goal, Cell? cell = null, List<Cell>? List_cell = null)
-    {
+    {   
         // Si les deux derniers paramètres ne sont pas mentionnés, on vient les chercher
         cell ??= this.cell;
         List_cell ??= new List<Cell>();
-
+        
 
         // On vient trier les voisins en fonction de leurs score
         List<Cell> Sorted_List_Neighboors = cell.Sort_non_visited_Neighboors();
@@ -121,8 +120,8 @@ public class Player
 
     public List<Cell> AStar(Cell Goal)
     {
-
         // *** INITIALISATION *** //
+        this.initScores();
         // Création de deux listes
         List<Cell> OpenList = new List<Cell>();
         List<Cell> ClosedList = new List<Cell>();
