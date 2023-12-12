@@ -14,41 +14,6 @@ public class Player
         this.cell = cell;
         this.grid = grid;
     }
-    //
-    // public Cell findBestNeighbour(Cell cell)
-    // {
-    //     // Compare H score of neighbours, return bests ones
-    //     // If there is more than one best neighbour, choose the one with the lowest H score
-    //     Cell bestNeighbour = cell;
-    //
-    //     foreach (Edge edge in cell.edges)
-    //     {
-    //         if (edge.cell2.isVisited == false)
-    //         {
-    //             edge.cell2.isVisited = true;
-    //             if (bestNeighbour == cell)
-    //             {
-    //                 bestNeighbour = edge.cell2;
-    //             }
-    //             else if (edge.cell2.HScore < bestNeighbour.HScore)
-    //             {
-    //                 bestNeighbour = edge.cell2;
-    //             }
-    //         }
-    //
-    //     }
-    //     bestNeighbour.print();
-    //     if (bestNeighbour == cell)
-    //     {
-    //         Console.WriteLine("No best neighbour found");
-    //     }
-    //     if (bestNeighbour == grid.grid[grid.goalX, grid.goalY])
-    //     {
-    //         Console.WriteLine("Goal found");
-    //     }
-    //     return bestNeighbour;
-    //
-    // }
 
     public void initScores()
     {
@@ -70,14 +35,17 @@ public class Player
         }
     }
 
-
-    public List<Cell> Go2Goal(Cell Goal, Cell? cell = null, List<Cell>? List_cell = null)
-    {   
+    public List<Cell> initBFS(Cell Goal, Cell? cell = null, List<Cell>? List_cell = null)
+    {   cell ??= this.cell;
+        List_cell ??= new List<Cell>(); 
         // Si les deux derniers paramètres ne sont pas mentionnés, on vient les chercher
-        cell ??= this.cell;
-        List_cell ??= new List<Cell>();
-        
+        this.initScores();
+        List_cell = this.BFS(Goal, cell, List_cell);
+        return List_cell;
 
+    }
+    public List<Cell> BFS(Cell Goal, Cell cell, List<Cell> List_cell)
+    {           
         // On vient trier les voisins en fonction de leurs score
         List<Cell> Sorted_List_Neighboors = cell.Sort_non_visited_Neighboors();
 
@@ -106,7 +74,7 @@ public class Player
             // Sinon, on vient appeler la fonction récursivement
             else if (!new_list_cell.Contains(Goal))
             {
-                List<Cell> result = Go2Goal(Goal, new_cell, new_list_cell);
+                List<Cell> result = BFS(Goal, new_cell, new_list_cell);
                 if (result.Contains(Goal))
                 {
                     return result;
@@ -118,7 +86,7 @@ public class Player
     }
 
 
-    public List<Cell> AStar(Cell Goal)
+    public (List<Cell>, List<List<Cell>>, List<List<Cell>>)AStar(Cell Goal)
     {
         // *** INITIALISATION *** //
         this.initScores();
@@ -126,6 +94,10 @@ public class Player
         List<Cell> OpenList = new List<Cell>();
         List<Cell> ClosedList = new List<Cell>();
         double successorCurrentCost;
+
+        // Sauvegarde des listes
+        List<List<Cell>> saveOpen = new List<List<Cell>>();
+        List<List<Cell>> saveClose = new List<List<Cell>>();
         // On ajoute la cellule de départ à la liste ouverte
         OpenList.Add(this.cell);
         //////////////////////////////
@@ -146,7 +118,7 @@ public class Player
             {   
                 Debug.Log("Chemin trouvé");
                 List<Cell> path = returnPath(current_cell);
-                return path;
+                return (path, saveOpen, saveClose);
             }
 
             // On vient chercher les voisins de la cellule
@@ -193,15 +165,18 @@ public class Player
             successor.parent = current_cell;
             // On calcule le FScore de la cellule
             successor.FScore = successor.GScore + successor.HScore;
+            
             }
             // FIN DE BOUCLE FOREACH
             ClosedList.Add(current_cell);
+            saveOpen.Add(new List<Cell>(OpenList));
+            saveClose.Add(new List<Cell>(ClosedList));
         }   
         // FIN DE BOUCLE WHILE
         
         Debug.Log("Aucun chemin trouvé");
         List<Cell> emptyList = new List<Cell>();
-        return emptyList;
+        return (emptyList, saveOpen, saveClose);
         
 
     }

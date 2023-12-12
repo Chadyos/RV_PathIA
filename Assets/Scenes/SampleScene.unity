@@ -943,8 +943,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   squarePrefab: {fileID: 1180949017462424722, guid: 5a5c27ba36de3e55bbdcb836867aa84f, type: 3}
-  gridWidth: 10
-  gridHeight: 10
+  gridWidth: 30
+  gridHeight: 30
   spacing: 1.03
 --- !u!1 &1759131666
 GameObject:

@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic; // Pour utiliser List<>
 using System.Collections;
 public class PathfindingManager : MonoBehaviour
@@ -15,23 +16,63 @@ public class PathfindingManager : MonoBehaviour
         return;
     }
 
-    private void ExecutePathfinding()
-    {   //Debug.Log("Pathfinding");
-        //Debug.Log("Position du joueur : x =" + PLAYER.cell.x + " y = " + PLAYER.cell.y);
-        //Debug.Log("Position du goal : x =" + GRID.goal.x + " y = " + GRID.goal.y);
-        //Debug.Log("gridGenerator != null"+ gridGenerator != null+ "ET player != null"+ PLAYER != null );  
+private void ExecutePathfinding()
+{
+    // Lancer la coroutine englobante
+    StartCoroutine(ExecutePathfindingSequence());
+}
 
-        if (gridGenerator != null && PLAYER != null)
-        {
-            PLAYER.initScores();
-            List<Cell> path = PLAYER.AStar(gridGenerator.GRID.goal);
-            // remove last cell from path
-            //path.RemoveAt(path.Count - 1);
-            Debug.Log("path : " + path);
-            StartCoroutine(RevealPath(path));
-        }
-        return;
+private IEnumerator ExecutePathfindingSequence()
+{
+    if (gridGenerator != null && PLAYER != null)
+    {
+        List<List<Cell>> saveOpen;
+        List<List<Cell>> saveClose;
+        List<Cell> path;
+        (path, saveOpen, saveClose) = PLAYER.AStar(gridGenerator.GRID.goal);
+
+        // Exécuter RevealSearch et attendre qu'elle soit terminée
+        yield return StartCoroutine(RevealSearch(saveOpen, saveClose));
+
+        // Ensuite, exécuter RevealPath
+        yield return StartCoroutine(RevealPath(path));
     }
+}
+IEnumerator RevealSearch(List<List<Cell>> saveOpen, List<List<Cell>> saveClose)
+{
+    for (int i = 0; i < saveOpen.Count; i++)
+    { Debug.Log("i : " + i);
+        int maxSize = Math.Max(saveOpen[i].Count, saveClose[i].Count);
+
+        for (int j = 0; j < maxSize; j++)
+        {
+            Debug.Log("j : " + j);
+            if (j < saveOpen[i].Count)
+            {
+                Cell cellOpen = saveOpen[i][j];
+                if (cellOpen != PLAYER.cell && cellOpen != GRID.goal)
+                {
+                    cellOpen.HighlightPath(Color.blue);
+                }
+            }
+
+            if (j < saveClose[i].Count)
+            {
+                Cell cellClose = saveClose[i][j];
+                if (cellClose != PLAYER.cell && cellClose != GRID.goal)
+                {
+                    cellClose.HighlightPath(Color.cyan);
+                }
+            }
+
+            // Optionnel : pause entre les itérations
+        }
+        yield return new WaitForSeconds(0.05f);
+
+    }
+    
+}
+
 
     IEnumerator RevealPath(List<Cell> path)
 {
